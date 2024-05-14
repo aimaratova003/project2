@@ -1,5 +1,17 @@
+provider "aws" {
+region = "us-east-2"
+}
+
+provider "aws" {
+  region = "us-east-2"
+}
+
 resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
+ cidr_block = "10.0.0.0/16"
+ 
+ tags = {
+   Name = "Project VPC"
+ }
 }
 
 resource "aws_subnet" "public" {
@@ -85,21 +97,40 @@ provider "aws" {
   description = "Allow access to our DB from anywhere"
 
   ingress {
-    protocol        = "tcp"
-    from_port       = 3306
-    to_port         = 63306
-    # security_groups = [aws_security_group.allow_tls.id]  # Replace <instance> with the actual identifier of your instance's security group
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 65535
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
   tags = {
     Name = "db-sg"
+  }
+}
+#ASG
+resource "aws_launch_template" "asg" {
+  name_prefix   = "asg"
+  image_id      = "ami-0900fe555666598a2"
+  instance_type = "t2.micro"
+}
+
+resource "aws_autoscaling_group" "asg" {
+  availability_zones = ["us-east-2a"]
+  desired_capacity   = 3
+  max_size           = 99
+  min_size           = 1
+
+launch_template {
+    id      = aws_launch_template.wordpress.id
+    version = "$Latest"
   }
 }
 
@@ -109,7 +140,7 @@ resource "aws_lb" "app_lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.public_sg.id]
-  subnets            = aws_subnet.public_subnets[*].id
+  subnets            = aws_subnet.public[*].id
 
   tags = {
     Name = "my-app-lb"
