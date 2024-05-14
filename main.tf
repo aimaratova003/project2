@@ -1,8 +1,4 @@
 provider "aws" {
-region = "us-east-2"
-}
-
-provider "aws" {
   region = "us-east-2"
 }
 
@@ -86,11 +82,6 @@ output "public_subnet_ids" {
 output "private_subnet_ids" {
   value = aws_subnet.private[*].id
 }
-
-provider "aws" {
-  region = "us-east-2"
-}
-
   resource "aws_security_group" "db-sg" {
   vpc_id = aws_vpc.main.id
   name   = "db-sg"
@@ -111,10 +102,6 @@ provider "aws" {
   }
 }
 
-  tags = {
-    Name = "db-sg"
-  }
-}
 #ASG
 resource "aws_launch_template" "asg" {
   name_prefix   = "asg"
@@ -127,11 +114,6 @@ resource "aws_autoscaling_group" "asg" {
   desired_capacity   = 3
   max_size           = 99
   min_size           = 1
-
-launch_template {
-    id      = aws_launch_template.wordpress.id
-    version = "$Latest"
-  }
 }
 
 #ALB
