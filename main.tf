@@ -79,22 +79,6 @@ provider "aws" {
   region = "us-east-2"
 }
 
-resource "aws_security_group" "web_sg" {
-  name        = "wordpress"
-  description = "wordpress"
-  vpc_id      = aws_vpc.main.id  
-} 
-
-    ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow SSH access from anywhere"
-    }
-
-
-
   resource "aws_security_group" "db-sg" {
   vpc_id = aws_vpc.main.id
   name   = "db-sg"
